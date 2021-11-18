@@ -61,3 +61,18 @@ resource "google_project_iam_member" "service_account-roles" {
   role    = each.value.role
   member  = "serviceAccount:${google_service_account.service_account[each.value.sa].email}"
 }
+
+# TODO: postgres service identity
+## Create service identity for sql
+#gcloud beta services identity create \
+#--service=sqladmin.googleapis.com \
+#--project=env-pod
+#
+## get project number
+#gcloud projects list
+#
+#gcloud kms keys add-iam-policy-binding env-pod-key-1 \
+#--location=region \
+#--keyring=env-pod-keyring-1 \
+#--member=serviceAccount:service-PROJECT_NUMBER@gcp-sa-cloud-sql.iam.gserviceaccount.com \
+#--role=roles/cloudkms.cryptoKeyEncrypterDecrypter

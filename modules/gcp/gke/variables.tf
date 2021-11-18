@@ -5,7 +5,7 @@ variable "region" {
   type        = string
 }
 
-variable "name" {
+variable "cluster_name" {
   description = "The name of the cluster"
   type        = string
 }
@@ -55,3 +55,28 @@ variable "subnetwork" {
 #  type        = string
 #}
 #
+
+variable "primary_nodepool_name" {
+  description = "The name of the primary nodepool"
+  type        = string
+}
+
+variable "zk_nodepool_name" {
+  description = "The name of the zk nodepool"
+  type        = string
+}
+
+variable "cass_nodepool_name" {
+  description = "The name of the cass nodepool"
+  type        = string
+}
+
+variable "ops_nodepool_name" {
+  description = "The name of the ops nodepool"
+  type        = string
+}
+
+variable "service_account" {
+  description = "The c3 default service account"
+  type        = string
+}
