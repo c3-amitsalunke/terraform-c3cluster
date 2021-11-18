@@ -1,7 +1,7 @@
 resource "google_container_cluster" "cluster" {
   provider = google-beta
 
-  name        = var.name
+  name        = var.cluster_name
   description = var.description
 
   project    = var.project
@@ -136,4 +136,135 @@ resource "google_container_cluster" "cluster" {
 #  }
 #
 #  resource_labels = var.resource_labels
+}
+
+resource "google_container_node_pool" "primary_nodepool" {
+  provider = google-beta
+
+  name       = var.primary_nodepool_name
+  cluster    = google_container_cluster.cluster.id
+  location   = var.region
+
+  autoscaling {
+    min_node_count = 3
+    max_node_count = 15
+  }
+
+  management {
+    auto_repair  = false
+    auto_upgrade = false
+  }
+
+  node_config {
+    disk_size_gb = 500
+    disk_type    = "pd-standard"
+    machine_type = "n2-highmem-8"
+
+    service_account = var.service_account
+
+    shielded_instance_config {
+      enable_secure_boot          = false
+      enable_integrity_monitoring = false
+    }
+  }
+}
+
+resource "google_container_node_pool" "zk_nodepool" {
+  provider = google-beta
+
+  name       = var.zk_nodepool_name
+  cluster    = google_container_cluster.cluster.id
+  location   = var.region
+  node_count = 1
+
+  management {
+    auto_repair  = false
+    auto_upgrade = false
+  }
+
+  node_config {
+    disk_size_gb = 100
+    disk_type    = "pd-standard"
+    machine_type = "n2-standard-8"
+
+    service_account = var.service_account
+
+    taint {
+      key    = "apps.c3.ai/part-of"
+      value  = "zookeeper"
+      effect = "NO_SCHEDULE"
+    }
+
+    shielded_instance_config {
+      enable_secure_boot          = false
+      enable_integrity_monitoring = false
+    }
+  }
+}
+
+resource "google_container_node_pool" "cass_nodepool" {
+  provider = google-beta
+
+  name       = var.cass_nodepool_name
+  cluster    = google_container_cluster.cluster.id
+  location   = var.region
+  node_count = 2
+
+  management {
+    auto_repair  = false
+    auto_upgrade = false
+  }
+
+  node_config {
+    disk_size_gb = 100
+    disk_type    = "pd-standard"
+    machine_type = "n2-highmem-4"
+
+    service_account = var.service_account
+
+    taint {
+      key    = "apps.c3.ai/part-of"
+      value  = "cassandra"
+      effect = "NO_SCHEDULE"
+    }
+
+    shielded_instance_config {
+      enable_secure_boot          = false
+      enable_integrity_monitoring = false
+    }
+  }
+}
+
+resource "google_container_node_pool" "ops_nodepool" {
+  provider = google-beta
+
+  name       = var.ops_nodepool_name
+  cluster    = google_container_cluster.cluster.id
+  location   = var.region
+  node_count = 1
+
+  management {
+    auto_repair  = true
+    auto_upgrade = true
+  }
+
+  node_config {
+    preemptible  = true
+    disk_size_gb = 100
+    disk_type    = "pd-standard"
+    machine_type = "n2-standard-4"
+
+    service_account = var.service_account
+
+    taint {
+      key    = "app.kubernetes.io/part-of"
+      value  = "c3-ops"
+      effect = "NO_SCHEDULE"
+    }
+
+    shielded_instance_config {
+      enable_secure_boot          = false
+      enable_integrity_monitoring = false
+    }
+  }
 }

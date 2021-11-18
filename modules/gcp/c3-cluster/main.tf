@@ -19,7 +19,7 @@ module "gcp-postgres" {
 
   project = var.project
   region  = var.region
-  name    = "${var.project}-pg-3"
+  name    = "${var.project}-pg-2"
 
   instance_type = var.pg_instance_type
 
@@ -38,10 +38,18 @@ module "gcp-postgres" {
 module "gke" {
   source = "../gke"
 
-  project     = var.project
-  description = "GKE cluster for c3"
-  name        = "${var.project}-gke-1"
-  network     = module.gcp-network.network
-  region      = var.region
-  subnetwork  = module.gcp-network.subnetwork_gke
+  project      = var.project
+  description  = "GKE cluster for c3"
+  cluster_name = "${var.project}-gke-1"
+  network      = module.gcp-network.network
+  region       = var.region
+  subnetwork   = module.gcp-network.subnetwork_gke
+
+  primary_nodepool_name = "${var.project}-nodepool-01"
+  zk_nodepool_name      = "${var.project}-nodepool-zk"
+  cass_nodepool_name    = "${var.project}-nodepool-cass"
+  ops_nodepool_name     = "${var.project}-nodepool-ops"
+
+  #sa = module.gcp-project.encryption_key_name
+  service_account = "c3-default@${var.project}.iam.gserviceaccount.com"
 }
