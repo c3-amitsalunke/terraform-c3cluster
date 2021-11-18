@@ -54,10 +54,10 @@ locals {
   ])
 }
 
-#resource "google_project_iam_member" "service_account-roles" {
-#  for_each = local.all_service_account_roles
-#
-#  project = var.project
-#  role    = each.role
-#  member  = "serviceAccount:${google_service_account.service_account.email}"
-#}
+resource "google_project_iam_member" "service_account-roles" {
+  for_each = { for entry in local.all_service_account_roles: "${entry.sa}.${entry.role}" => entry }
+
+  project = var.project
+  role    = each.value.role
+  member  = "serviceAccount:${google_service_account.service_account[each.value.sa].email}"
+}
