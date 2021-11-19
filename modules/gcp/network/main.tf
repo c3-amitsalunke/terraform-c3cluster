@@ -4,6 +4,25 @@ resource "google_compute_network" "vpc" {
   routing_mode            = "REGIONAL"
 }
 
+resource "google_compute_firewall" "default-443" {
+  name    = "default-443"
+  network = google_compute_network.vpc.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["443"]
+  }
+
+  source_ranges = [
+    "54.76.64.220/32",
+    "12.226.154.130/32",
+    "34.238.215.224/32",
+    "34.231.113.223/32",
+    "52.48.79.190/32",
+    "34.232.23.54/32"
+  ]
+}
+
 # Subnet - dmz
 resource "google_compute_subnetwork" "vpc_subnetwork_dmz" {
   name = "${var.project}-sn-dmz-1"
