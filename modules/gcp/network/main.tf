@@ -4,8 +4,8 @@ resource "google_compute_network" "vpc" {
   routing_mode            = "REGIONAL"
 }
 
-resource "google_compute_firewall" "default-443" {
-  name    = "default-443"
+resource "google_compute_firewall" "c3-443" {
+  name    = "c3-443"
   network = google_compute_network.vpc.name
 
   allow {
@@ -20,6 +20,20 @@ resource "google_compute_firewall" "default-443" {
     "34.231.113.223/32",
     "52.48.79.190/32",
     "34.232.23.54/32"
+  ]
+}
+
+resource "google_compute_firewall" "internal-5432" {
+  name    = "internal-5432"
+  network = google_compute_network.vpc.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["5432"]
+  }
+
+  source_ranges = [
+    "10.0.0.0/8"
   ]
 }
 
