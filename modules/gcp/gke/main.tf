@@ -141,9 +141,16 @@ resource "google_container_cluster" "cluster" {
 resource "google_container_node_pool" "primary_nodepool" {
   provider = google-beta
 
-  name       = var.primary_nodepool_name
-  cluster    = google_container_cluster.cluster.id
-  location   = var.region
+  name     = var.primary_nodepool_name
+  cluster  = google_container_cluster.cluster.id
+  location = var.region
+
+  initial_node_count = 1
+  lifecycle {
+    ignore_changes = [
+      initial_node_count
+    ]
+  }
 
   autoscaling {
     min_node_count = 3
