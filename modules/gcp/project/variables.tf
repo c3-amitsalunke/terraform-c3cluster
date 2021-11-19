@@ -1,7 +1,7 @@
 variable "project" {}
 
 variable "region" {
-  description = "The region for subnetworks in the network"
+  description = "The region for subnetworks in the network. Ref https://cloud.google.com/compute/docs/general-purpose-machines & https://cloud.google.com/compute/docs/regions-zones"
   type        = string
 }
 
@@ -21,6 +21,18 @@ variable "activate_apis" {
     "sqladmin.googleapis.com",
     "servicenetworking.googleapis.com"
   ]
+}
+
+variable "key_ring_name" {
+  description = "A `KeyRing` is a toplevel logical grouping of `CryptoKeys`"
+  type        = string
+  default     = ""
+}
+
+variable "crypto_key_name" {
+  description = "A logical key that can be used for cryptographic operations"
+  type        = string
+  default     = ""
 }
 
 variable "kms_members" {

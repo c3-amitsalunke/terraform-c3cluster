@@ -1,3 +1,8 @@
+locals {
+  key_ring_name   = var.key_ring_name != "" ? var.key_ring_name : "${var.project}-keyring-1"
+  crypto_key_name = var.crypto_key_name != "" ? var.crypto_key_name : "${var.project}-key-1"
+}
+
 resource "google_project_service" "project_services" {
   for_each = var.activate_apis
   project  = var.project
@@ -5,17 +10,17 @@ resource "google_project_service" "project_services" {
 }
 
 resource "google_kms_key_ring" "keyring" {
-  name     = "${var.project}-keyring-1"
+  name     = local.key_ring_name
   location = var.region
 }
 
 resource "google_kms_crypto_key" "kms_key" {
-  name            = "${var.project}-key-1"
+  name            = local.crypto_key_name
   key_ring        = google_kms_key_ring.keyring.id
   rotation_period = "7776000s"
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
 
@@ -45,17 +50,17 @@ resource "google_service_account" "service_account" {
 
 locals {
   all_service_account_roles = flatten([
-    for sa in keys(var.c3_service_accounts) : [
-      for role in var.c3_service_accounts[sa].roles : {
-        sa  = sa
-        role = role
-      }
-    ]
+  for sa in keys(var.c3_service_accounts) : [
+  for role in var.c3_service_accounts[sa].roles : {
+    sa   = sa
+    role = role
+  }
+  ]
   ])
 }
 
 resource "google_project_iam_member" "service_account-roles" {
-  for_each = { for entry in local.all_service_account_roles: "${entry.sa}.${entry.role}" => entry }
+  for_each = {for entry in local.all_service_account_roles : "${entry.sa}.${entry.role}" => entry}
 
   project = var.project
   role    = each.value.role
