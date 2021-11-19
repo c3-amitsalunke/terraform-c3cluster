@@ -75,4 +75,5 @@ resource "google_project_iam_member" "service_account-roles" {
 #--location=region \
 #--keyring=env-pod-keyring-1 \
 #--member=serviceAccount:service-PROJECT_NUMBER@gcp-sa-cloud-sql.iam.gserviceaccount.com \
-#--role=roles/cloudkms.cryptoKeyEncrypterDecrypter
+#--role=roles/cloudkms.cryptoKeyEncrypterDecrypter \
+#--project=env-pod
