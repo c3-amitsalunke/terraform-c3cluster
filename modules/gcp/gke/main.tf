@@ -17,13 +17,15 @@ resource "google_container_cluster" "cluster" {
   remove_default_node_pool = true
   initial_node_count = 1
 
-  workload_identity_config {
-    workload_pool = "${var.project}.svc.id.goog"
-  }
+#  workload_identity_config {
+#    workload_pool = "${var.project}.svc.id.goog"
+#  }
 
+  ip_allocation_policy {}
   private_cluster_config {
     enable_private_nodes    = true
     enable_private_endpoint = false
+    master_ipv4_cidr_block  = "192.168.0.0/28"
   }
 }
 

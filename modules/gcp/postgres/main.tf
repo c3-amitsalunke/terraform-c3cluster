@@ -15,9 +15,13 @@ resource "google_sql_database_instance" "master" {
     disk_type         = var.disk_type
 
     ip_configuration {
-      ipv4_enabled    = false
+      ipv4_enabled    = true
       private_network = var.private_network
       require_ssl     = false
+
+      authorized_networks = [
+
+      ]
     }
 
     backup_configuration {
@@ -36,3 +40,10 @@ resource "google_sql_database_instance" "master" {
     user_labels = var.custom_labels
   }
 }
+
+#resource "google_sql_user" "postgres_user" {
+#  name     = "postgres"
+#  instance = google_sql_database_instance.master.name
+#  host     = "bla.bla@bla"
+#  password = "postgres"
+#}
