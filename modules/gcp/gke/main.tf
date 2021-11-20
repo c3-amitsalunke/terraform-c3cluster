@@ -15,11 +15,11 @@ resource "google_container_cluster" "cluster" {
   enable_legacy_abac = false
 
   remove_default_node_pool = true
-  initial_node_count = 1
+  initial_node_count       = 1
 
-#  workload_identity_config {
-#    workload_pool = "${var.project}.svc.id.goog"
-#  }
+  #  workload_identity_config {
+  #    workload_pool = "${var.project}.svc.id.goog"
+  #  }
 
   ip_allocation_policy {}
   private_cluster_config {
@@ -165,4 +165,32 @@ resource "google_container_node_pool" "ops_nodepool" {
       enable_integrity_monitoring = false
     }
   }
+}
+
+data "google_compute_zones" "available" {
+  project = var.project
+  region  = var.region
+  status  = "UP"
+}
+
+resource "google_filestore_instance" "instance" {
+  provider = google-beta
+
+  name = var.project
+  zone = data.google_compute_zones.available.names[0]
+  tier = "PREMIUM"
+
+  file_shares {
+    capacity_gb = 2560
+    name        = "c3_cfw"
+  }
+
+  networks {
+    network = "${var.project}-vpc-1"
+    modes   = ["MODE_IPV4"]
+#
+    connect_mode = "DIRECT_PEERING"
+  }
+
+  project = var.project
 }

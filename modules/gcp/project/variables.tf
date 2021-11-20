@@ -19,7 +19,8 @@ variable "activate_apis" {
     "serviceusage.googleapis.com",
     "cloudkms.googleapis.com",
     "sqladmin.googleapis.com",
-    "servicenetworking.googleapis.com"
+    "servicenetworking.googleapis.com",
+    "file.googleapis.com"
   ]
 }
 
