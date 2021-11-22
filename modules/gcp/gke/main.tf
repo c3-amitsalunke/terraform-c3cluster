@@ -194,3 +194,5 @@ resource "google_filestore_instance" "instance" {
 
   project = var.project
 }
+
+# Enable CSI for filestore - https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/filestore-csi-driver
