@@ -1,12 +1,36 @@
+# TODD :
+# 1. move kms to separate submodule
+# 2. move gcs to separate submodule
+# 3. remove outputs dependency
+
+# gcp services
+resource "google_project_service" "project_services" {
+  for_each = var.activate_apis
+  project  = var.project
+  service  = each.value
+}
+
+## KMS
+#https://cloud.google.com/sql/docs/mysql/configure-cmek#grantkey
+#https://cloud.google.com/sql/docs/mysql/configure-cmek#service-account
+#https://cloud.google.com/sql/docs/mysql/configure-cmek
+
+data "google_project" "gcp_project" {
+}
+
+data "google_storage_project_service_account" "gcs_account" {
+}
+
 locals {
   key_ring_name   = var.key_ring_name != "" ? var.key_ring_name : "${var.project}-keyring-1"
   crypto_key_name = var.crypto_key_name != "" ? var.crypto_key_name : "${var.project}-key-1"
 }
 
-resource "google_project_service" "project_services" {
-  for_each = var.activate_apis
-  project  = var.project
-  service  = each.value
+locals {
+  kms_members = concat(
+    ["serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"],
+    ["serviceAccount:service-${data.google_project.gcp_project.number}@gcp-sa-cloud-sql.iam.gserviceaccount.com"]
+  )
 }
 
 resource "google_kms_key_ring" "keyring" {
@@ -23,62 +47,27 @@ resource "google_kms_crypto_key" "kms_key" {
     prevent_destroy = false
   }
 }
-
-#https://cloud.google.com/sql/docs/mysql/configure-cmek#grantkey
-#https://cloud.google.com/sql/docs/mysql/configure-cmek#service-account
-#https://cloud.google.com/sql/docs/mysql/configure-cmek
-#resource "google_kms_crypto_key_iam_binding" "decrypters" {
-#  role          = "roles/cloudkms.cryptoKeyDecrypter"
-#  crypto_key_id = google_kms_crypto_key.kms_key.id
-#  members       = var.kms_members
-#}
-#
-#resource "google_kms_crypto_key_iam_binding" "encrypters" {
-#  role          = "roles/cloudkms.cryptoKeyEncrypter"
-#  crypto_key_id = google_kms_crypto_key.kms_key.id
-#  members       = var.kms_members
-#}
-
-#https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster
-
-resource "google_service_account" "service_account" {
-  for_each     = var.c3_service_accounts
-  project      = var.project
-  account_id   = each.key
-  display_name = each.value.display_name
+resource "google_kms_crypto_key_iam_binding" "EncrypterDecrypter" {
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  crypto_key_id = google_kms_crypto_key.kms_key.id
+  members       = local.kms_members
 }
 
+## GCS
 locals {
-  all_service_account_roles = flatten([
-  for sa in keys(var.c3_service_accounts) : [
-  for role in var.c3_service_accounts[sa].roles : {
-    sa   = sa
-    role = role
+  bucket_name = "${replace(var.project, "-", "")}store01"
+}
+
+resource "google_storage_bucket" "storage_bucket_default" {
+  name          = local.bucket_name
+  location      = var.region
+  force_destroy = true
+
+  uniform_bucket_level_access = true
+
+  encryption {
+    default_kms_key_name = google_kms_crypto_key.kms_key.id
   }
-  ]
-  ])
+
+  depends_on = [google_kms_crypto_key_iam_binding.EncrypterDecrypter]
 }
-
-resource "google_project_iam_member" "service_account-roles" {
-  for_each = {for entry in local.all_service_account_roles : "${entry.sa}.${entry.role}" => entry}
-
-  project = var.project
-  role    = each.value.role
-  member  = "serviceAccount:${google_service_account.service_account[each.value.sa].email}"
-}
-
-# TODO: postgres service identity
-## Create service identity for sql
-#gcloud beta services identity create \
-#--service=sqladmin.googleapis.com \
-#--project=env-pod
-#
-## get project number
-#gcloud projects list
-#
-#gcloud kms keys add-iam-policy-binding env-pod-key-1 \
-#--location=region \
-#--keyring=env-pod-keyring-1 \
-#--member=serviceAccount:service-PROJECT_NUMBER@gcp-sa-cloud-sql.iam.gserviceaccount.com \
-#--role=roles/cloudkms.cryptoKeyEncrypterDecrypter \
-#--project=env-pod

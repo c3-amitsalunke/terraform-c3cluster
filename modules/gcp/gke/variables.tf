@@ -15,12 +15,6 @@ variable "description" {
   type        = string
 }
 
-#variable "enable_workload_identity" {
-#  description = "Enable Workload Identity on the cluster"
-#  default     = true
-#  type        = bool
-#}
-
 variable "logging_service" {
   description = "The logging service that the cluster should write logs to. Available options include logging.googleapis.com/kubernetes, logging.googleapis.com (legacy), and none"
   type        = string
@@ -49,12 +43,6 @@ variable "subnetwork" {
   description = "A reference (self link) to the subnetwork to host the cluster in"
   type        = string
 }
-
-#variable "cluster_secondary_range_name" {
-#  description = "The name of the secondary range within the subnetwork for the cluster to use"
-#  type        = string
-#}
-#
 
 variable "primary_nodepool_name" {
   description = "The name of the primary nodepool"

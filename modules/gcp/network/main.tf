@@ -1,3 +1,7 @@
+# TODO:
+# 1. remove outputs dependency
+# 2. remove c3 ips
+
 resource "google_compute_network" "vpc" {
   name                    = "${var.project}-vpc-1"
   auto_create_subnetworks = "false"

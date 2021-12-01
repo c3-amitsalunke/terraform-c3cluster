@@ -1,3 +1,7 @@
+# TODO:
+# 1. Enable CSI for filestore - https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/filestore-csi-driver if gcs is not available
+# 2. Parameterize node pool configuration
+
 resource "google_container_cluster" "cluster" {
   provider = google-beta
 
@@ -17,15 +21,15 @@ resource "google_container_cluster" "cluster" {
   remove_default_node_pool = true
   initial_node_count       = 1
 
-  #  workload_identity_config {
-  #    workload_pool = "${var.project}.svc.id.goog"
-  #  }
-
   ip_allocation_policy {}
   private_cluster_config {
     enable_private_nodes    = true
     enable_private_endpoint = false
     master_ipv4_cidr_block  = "192.168.0.0/28"
+  }
+
+  workload_identity_config {
+    workload_pool = "${var.project}.svc.id.goog"
   }
 }
 
@@ -63,6 +67,10 @@ resource "google_container_node_pool" "primary_nodepool" {
     shielded_instance_config {
       enable_secure_boot          = false
       enable_integrity_monitoring = false
+    }
+
+    workload_metadata_config {
+      mode = "GKE_METADATA"
     }
   }
 }
@@ -188,11 +196,9 @@ resource "google_filestore_instance" "instance" {
   networks {
     network = "${var.project}-vpc-1"
     modes   = ["MODE_IPV4"]
-#
+
     connect_mode = "DIRECT_PEERING"
   }
 
   project = var.project
 }
-
-# Enable CSI for filestore - https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/filestore-csi-driver

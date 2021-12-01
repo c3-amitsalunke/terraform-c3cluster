@@ -40,10 +40,3 @@ resource "google_sql_database_instance" "master" {
     user_labels = var.custom_labels
   }
 }
-
-#resource "google_sql_user" "postgres_user" {
-#  name     = "postgres"
-#  instance = google_sql_database_instance.master.name
-#  host     = "bla.bla@bla"
-#  password = "postgres"
-#}
