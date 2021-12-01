@@ -1,7 +1,3 @@
-# TODO:
-# 1. Enable CSI for filestore - https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/filestore-csi-driver if gcs is not available
-# 2. Parameterize node pool configuration
-
 resource "google_container_cluster" "cluster" {
   provider = google-beta
 

@@ -1,8 +1,3 @@
-# TODD :
-# 1. move kms to separate submodule
-# 2. move gcs to separate submodule
-# 3. remove outputs dependency
-
 # gcp services
 resource "google_project_service" "project_services" {
   for_each = var.activate_apis
@@ -11,10 +6,6 @@ resource "google_project_service" "project_services" {
 }
 
 ## KMS
-#https://cloud.google.com/sql/docs/mysql/configure-cmek#grantkey
-#https://cloud.google.com/sql/docs/mysql/configure-cmek#service-account
-#https://cloud.google.com/sql/docs/mysql/configure-cmek
-
 data "google_project" "gcp_project" {
 }
 

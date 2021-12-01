@@ -1,7 +1,3 @@
-# TODO:
-# 1. automate postgres service identity `gcloud beta services identity create --service=sqladmin.googleapis.com --project=env-pod`
-
-#https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster
 resource "google_service_account" "service_account" {
   for_each     = var.c3_service_accounts
   project      = var.project

@@ -33,7 +33,6 @@ variable "kubernetes_version" {
   default     = "1.21"
 }
 
-
 variable "network" {
   description = "A reference (self link) to the VPC network to host the cluster in"
   type        = string
