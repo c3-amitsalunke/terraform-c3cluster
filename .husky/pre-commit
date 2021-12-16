@@ -28,5 +28,5 @@ tfsec() {
 ## Validate text and python
 #super_linter
 
-#checkov
+checkov
 tfsec

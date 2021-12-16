@@ -61,5 +61,7 @@ resource "google_storage_bucket" "storage_bucket_default" {
     default_kms_key_name = google_kms_crypto_key.kms_key.id
   }
 
+  #checkov:skip=CKV_GCP_62:Bucket should log access
+
   depends_on = [google_kms_crypto_key_iam_binding.EncrypterDecrypter]
 }

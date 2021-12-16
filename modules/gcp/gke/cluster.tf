@@ -2,6 +2,15 @@
 resource "google_container_cluster" "cluster" {
   provider = google-beta
 
+  #checkov:skip=CKV_GCP_22:Ensure Container-Optimized OS (cos) is used for Kubernetes Engine Clusters Node image
+  #checkov:skip=CKV_GCP_72:Ensure Integrity Monitoring for Shielded GKE Nodes is Enabled
+  #checkov:skip=CKV_GCP_13:Ensure a client certificate is used by clients to authenticate to Kubernetes Engine Cluster
+  #checkov:skip=CKV_GCP_19:Ensure GKE basic auth is disabled
+  #checkov:skip=CKV_GCP_69:Ensure the GKE Metadata Server is Enabled
+  #checkov:skip=CKV_GCP_65:Manage Kubernetes RBAC users with Google Groups for GKE
+  #checkov:skip=CKV_GCP_24:Ensure PodSecurityPolicy controller is enabled on the Kubernetes Engine Clusters
+  #checkov:skip=CKV_GCP_67:Ensure legacy Compute Engine instance metadata APIs are Disabled
+
   name        = var.cluster_name
   description = var.description
   project     = var.project
@@ -170,12 +179,14 @@ resource "google_container_node_pool" "pools" {
 #  min_cpu_platform           = "Intel Skylake"
 
   management {
+    #checkov:skip=CKV_GCP_9:Ensure 'Automatic node repair' is enabled for Kubernetes Clusters
     auto_repair  = lookup(each.value, "auto_repair", true)
     #    auto_upgrade = lookup(each.value, "auto_upgrade", local.default_auto_upgrade)
     auto_upgrade = true
   }
 
   node_config {
+    #checkov:skip=CKV_GCP_22:Ensure Container-Optimized OS (cos) is used for Kubernetes Engine Clusters Node image
     image_type   = lookup(each.value, "image_type", "COS")
     machine_type = lookup(each.value, "machine_type", "n2-standard-4")
     disk_size_gb = lookup(each.value, "disk_size_gb", 100)
@@ -193,7 +204,9 @@ resource "google_container_node_pool" "pools" {
     }
 
     shielded_instance_config {
+      #checkov:skip=CKV_GCP_68:Ensure Secure Boot for Shielded GKE Nodes is Enabled
       enable_secure_boot          = lookup(each.value, "enable_secure_boot", false)
+      #checkov:skip=CKV_GCP_72:Ensure Integrity Monitoring for Shielded GKE Nodes is Enabled
       enable_integrity_monitoring = lookup(each.value, "enable_integrity_monitoring", true)
     }
 
