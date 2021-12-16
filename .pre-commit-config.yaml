@@ -1,0 +1,46 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      # Git style
+      - id: check-added-large-files
+      - id: check-merge-conflict
+
+      # Common errors
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        args: [ --markdown-linebreak-ext=md ]
+      - id: check-yaml
+      - id: check-merge-conflict
+
+      # Cross platform
+      - id: check-case-conflict
+      - id: mixed-line-ending
+        args: [ --fix=lf ]
+
+      # Security
+      - id: detect-aws-credentials
+        args: [ '--allow-missing-credentials' ]
+      - id: detect-private-key
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.58.0
+    hooks:
+      - id: checkov
+        args: [
+          "-d", ".",
+          "--skip-check", "CKV2_GCP_3",
+          "--skip-check", "CKV_GCP_6",
+          "--skip-check", "CKV_GCP_12",
+          "--skip-check", "CKV_GCP_20",
+          "--skip-check", "CKV_GCP_21",
+          "--skip-check", "CKV_GCP_24",
+          "--skip-check", "CKV_GCP_62",
+          "--skip-check", "CKV_GCP_65",
+        ]
+      - id: terraform_fmt
+      - id: terraform_docs
+      - id: terraform_tflint
+#      - id: terraform_tfsec
+#      - id: terraform_validate
+#      - id: terrascan

@@ -2,11 +2,11 @@ variable "project" {}
 
 variable "c3_service_accounts" {
   description = "Service Accounts for c3 deployment"
-  type        = map(object({
+  type = map(object({
     display_name = string
     roles        = list(string)
   }))
-  default     = {
+  default = {
     "c3-admin" : {
       "display_name" : "Admin service account for c3 deployment",
       "roles" : [
@@ -30,6 +30,12 @@ variable "c3_service_accounts" {
       "roles" : [
         "roles/storage.admin"
       ]
+    },
+    "c3-default" : {
+      "display_name" : "Default Service account for c3 deployment",
+      "roles" : [
+        "roles/actions.Viewer"
+      ]
     }
   }
 }
@@ -37,7 +43,7 @@ variable "c3_service_accounts" {
 variable "kubernetes_workload_identity_users" {
   description = "Service Accounts binding for kubernetes deployment"
   type        = map(list(string))
-  default     = {
+  default = {
     "c3-admin" : [
       "argo/argo"
     ],

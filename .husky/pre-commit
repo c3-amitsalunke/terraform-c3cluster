@@ -1,0 +1,32 @@
+#!/bin/sh
+
+. "$(dirname "$0")/_/husky.sh"
+
+export PATH="$PWD/node_modules/.bin/:/usr/local/bin/:$PATH"
+
+# shellcheck disable=SC2120
+super_linter() {
+  cmd="docker run -e RUN_LOCAL=true -e VALIDATE_CLOUDFORMATION=false -e VALIDATE_JSCPD=false -e VALIDATE_PYTHON_PYLINT=false -e VALIDATE_PYTHON_MYPY=false -e VALIDATE_PYTHON_BLACK=false -e FILTER_REGEX_EXCLUDE=.*husky.* -v $PWD:/tmp/lint"
+  if [ $# -eq 0 ]; then
+    cmd="${cmd} github/super-linter"
+  else
+    cmd="${cmd} --entrypoint= github/super-linter $*"
+  fi
+  $cmd
+}
+
+checkov() {
+  cmd="docker run -t -v $PWD:/tf bridgecrew/checkov -d /tf"
+  $cmd
+}
+
+tfsec() {
+  cmd="docker run --rm -t -v $(pwd):/src aquasec/tfsec /src"
+  $cmd
+}
+
+## Validate text and python
+#super_linter
+
+#checkov
+tfsec

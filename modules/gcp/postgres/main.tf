@@ -1,9 +1,9 @@
 resource "google_sql_database_instance" "master" {
-  provider         = google-beta
-  name             = var.name
-  project          = var.project
-  region           = var.region
-  database_version = var.postgres_version
+  provider            = google-beta
+  name                = var.name
+  project             = var.project
+  region              = var.region
+  database_version    = var.postgres_version
   deletion_protection = var.deletion_protection
   encryption_key_name = var.encryption_key_name
 
@@ -14,9 +14,31 @@ resource "google_sql_database_instance" "master" {
     disk_size         = var.disk_size
     disk_type         = var.disk_type
 
+    database_flags {
+      name  = "log_temp_files"
+      value = "0"
+    }
+    database_flags {
+      name  = "log_lock_waits"
+      value = "on"
+    }
+    database_flags {
+      name  = "log_checkpoints"
+      value = "on"
+    }
+    database_flags {
+      name  = "log_disconnections"
+      value = "on"
+    }
+    database_flags {
+      name  = "log_connections"
+      value = "on"
+    }
+
     ip_configuration {
-      ipv4_enabled    = true
+      ipv4_enabled    = false
       private_network = var.private_network
+      #tfsec:ignore:google-sql-encrypt-in-transit-data
       require_ssl     = false
 
       authorized_networks = [

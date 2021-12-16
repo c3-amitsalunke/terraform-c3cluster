@@ -20,7 +20,8 @@ locals {
 locals {
   kms_members = concat(
     ["serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"],
-    ["serviceAccount:service-${data.google_project.gcp_project.number}@gcp-sa-cloud-sql.iam.gserviceaccount.com"]
+    ["serviceAccount:service-${data.google_project.gcp_project.number}@gcp-sa-cloud-sql.iam.gserviceaccount.com"],
+    ["serviceAccount:service-${data.google_project.gcp_project.number}@container-engine-robot.iam.gserviceaccount.com"]
   )
 }
 

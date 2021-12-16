@@ -1,0 +1,12 @@
+#output: github_failed_only
+output: cli
+skip-check:
+  - CKV2_GCP_3
+  - CKV_GCP_6
+  - CKV_GCP_12
+  - CKV_GCP_20
+  - CKV_GCP_21
+  - CKV_GCP_24
+  - CKV_GCP_62
+  - CKV_GCP_65
+soft-fail: false

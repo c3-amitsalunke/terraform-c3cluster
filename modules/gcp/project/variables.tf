@@ -8,7 +8,7 @@ variable "region" {
 variable "activate_apis" {
   description = "List of APIs to be enabled"
   type        = set(string)
-  default     = [
+  default = [
     "iam.googleapis.com",
     "compute.googleapis.com",
     "bigquery.googleapis.com",

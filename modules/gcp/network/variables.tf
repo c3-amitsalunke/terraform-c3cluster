@@ -19,7 +19,7 @@ variable "secondary_cidr_block" {
 
 variable "log_config" {
   description = "The logging options for the subnetwork flow logs. Setting this value to `null` will disable them"
-  type        = object({
+  type = object({
     aggregation_interval = string
     flow_sampling        = number
     metadata             = string

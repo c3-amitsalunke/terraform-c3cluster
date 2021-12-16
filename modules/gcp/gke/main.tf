@@ -1,200 +1,56 @@
-resource "google_container_cluster" "cluster" {
-  provider = google-beta
+/**
+ * Copyright 2018 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-  name        = var.cluster_name
-  description = var.description
+// This file was automatically generated from a template in ./autogen/main
 
-  project    = var.project
-  location   = var.region
-  network    = var.network
-  subnetwork = var.subnetwork
-
-  logging_service    = var.logging_service
-  monitoring_service = var.monitoring_service
-  min_master_version = var.kubernetes_version
-  enable_legacy_abac = false
-
-  remove_default_node_pool = true
-  initial_node_count       = 1
-
-  ip_allocation_policy {}
-  private_cluster_config {
-    enable_private_nodes    = true
-    enable_private_endpoint = false
-    master_ipv4_cidr_block  = "192.168.0.0/28"
-  }
-
-  workload_identity_config {
-    workload_pool = "${var.project}.svc.id.goog"
-  }
-}
-
-resource "google_container_node_pool" "primary_nodepool" {
-  provider = google-beta
-
-  name     = var.primary_nodepool_name
-  cluster  = google_container_cluster.cluster.id
-  location = var.region
-
-  initial_node_count = 1
-  lifecycle {
-    ignore_changes = [
-      initial_node_count
-    ]
-  }
-
-  autoscaling {
-    min_node_count = 3
-    max_node_count = 15
-  }
-
-  management {
-    auto_repair  = false
-    auto_upgrade = false
-  }
-
-  node_config {
-    disk_size_gb = 500
-    disk_type    = "pd-standard"
-    machine_type = "n2-highmem-8"
-
-    service_account = var.service_account
-
-    shielded_instance_config {
-      enable_secure_boot          = false
-      enable_integrity_monitoring = false
-    }
-
-    workload_metadata_config {
-      mode = "GKE_METADATA"
-    }
-  }
-}
-
-resource "google_container_node_pool" "zk_nodepool" {
-  provider = google-beta
-
-  name       = var.zk_nodepool_name
-  cluster    = google_container_cluster.cluster.id
-  location   = var.region
-  node_count = 1
-
-  management {
-    auto_repair  = false
-    auto_upgrade = false
-  }
-
-  node_config {
-    disk_size_gb = 100
-    disk_type    = "pd-standard"
-    machine_type = "n2-standard-8"
-
-    service_account = var.service_account
-
-    taint {
-      key    = "apps.c3.ai/part-of"
-      value  = "zookeeper"
-      effect = "NO_SCHEDULE"
-    }
-
-    shielded_instance_config {
-      enable_secure_boot          = false
-      enable_integrity_monitoring = false
-    }
-  }
-}
-
-resource "google_container_node_pool" "cass_nodepool" {
-  provider = google-beta
-
-  name       = var.cass_nodepool_name
-  cluster    = google_container_cluster.cluster.id
-  location   = var.region
-  node_count = 2
-
-  management {
-    auto_repair  = false
-    auto_upgrade = false
-  }
-
-  node_config {
-    disk_size_gb = 100
-    disk_type    = "pd-standard"
-    machine_type = "n2-highmem-4"
-
-    service_account = var.service_account
-
-    taint {
-      key    = "apps.c3.ai/part-of"
-      value  = "cassandra"
-      effect = "NO_SCHEDULE"
-    }
-
-    shielded_instance_config {
-      enable_secure_boot          = false
-      enable_integrity_monitoring = false
-    }
-  }
-}
-
-resource "google_container_node_pool" "ops_nodepool" {
-  provider = google-beta
-
-  name       = var.ops_nodepool_name
-  cluster    = google_container_cluster.cluster.id
-  location   = var.region
-  node_count = 1
-
-  management {
-    auto_repair  = true
-    auto_upgrade = true
-  }
-
-  node_config {
-    preemptible  = true
-    disk_size_gb = 100
-    disk_type    = "pd-standard"
-    machine_type = "n2-standard-4"
-
-    service_account = var.service_account
-
-    taint {
-      key    = "app.kubernetes.io/part-of"
-      value  = "c3-ops"
-      effect = "NO_SCHEDULE"
-    }
-
-    shielded_instance_config {
-      enable_secure_boot          = false
-      enable_integrity_monitoring = false
-    }
-  }
-}
-
+/******************************************
+  Get available zones in region
+ *****************************************/
 data "google_compute_zones" "available" {
+  provider = google-beta
+
   project = var.project
   region  = var.region
-  status  = "UP"
 }
 
-resource "google_filestore_instance" "instance" {
-  provider = google-beta
+resource "random_shuffle" "available_zones" {
+  input        = data.google_compute_zones.available.names
+  result_count = 3
+}
 
-  name = var.project
-  zone = data.google_compute_zones.available.names[0]
-  tier = "PREMIUM"
+locals {
+  // Kubernetes version
+  master_version = var.kubernetes_version != "latest" ? var.kubernetes_version : data.google_container_engine_versions.region.latest_master_version
 
-  file_shares {
-    capacity_gb = 2560
-    name        = "c3_cfw"
-  }
+  // Build a map of maps of node pools from a list of objects
+  node_pool_names = [for np in toset(var.node_pools) : np.name]
+  node_pools      = zipmap(local.node_pool_names, tolist(toset(var.node_pools)))
 
-  networks {
-    network = "${var.project}-vpc-1"
-    modes   = ["MODE_IPV4"]
+  release_channel      = var.release_channel != null ? [{ channel : var.release_channel }] : []
+  default_auto_upgrade = var.release_channel != null ? true : false
 
-    connect_mode = "DIRECT_PEERING"
-  }
+  #  cluster_subnet_cidr       = var.add_cluster_firewall_rules ? data.google_compute_subnetwork.gke_subnetwork[0].ip_cidr_range : null
+  #  cluster_alias_ranges_cidr = var.add_cluster_firewall_rules ? { for range in toset(data.google_compute_subnetwork.gke_subnetwork[0].secondary_ip_range) : range.range_name => range.ip_cidr_range } : {}
 
-  project = var.project
+  #  cluster_gce_pd_csi_config = [{ enabled = true }]
+}
+/******************************************
+  Get available container engine versions
+ *****************************************/
+data "google_container_engine_versions" "region" {
+  location = var.region
+  project  = var.project
 }

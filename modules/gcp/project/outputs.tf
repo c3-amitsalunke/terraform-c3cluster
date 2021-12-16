@@ -4,6 +4,6 @@ output "project_services" {
 }
 
 output "encryption_key_name" {
-  value = google_kms_crypto_key.kms_key.id
+  value       = google_kms_crypto_key.kms_key.id
   description = "The Encryption Key for gcp project"
 }
