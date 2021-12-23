@@ -41,10 +41,6 @@ resource "google_sql_database_instance" "master" {
       #tfsec:ignore:google-sql-encrypt-in-transit-data
       #checkov:skip=CKV_GCP_6:Ensure all Cloud SQL database instance requires all incoming connections to use SSL
       require_ssl     = false
-
-      authorized_networks = [
-
-      ]
     }
 
     backup_configuration {

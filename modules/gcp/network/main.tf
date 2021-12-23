@@ -62,8 +62,6 @@ resource "google_compute_subnetwork" "vpc_subnetwork_dmz" {
       metadata             = var.log_config.metadata
     }
   }
-
-  enable_flow_logs = true
 }
 
 # Subnet - gke
@@ -95,8 +93,6 @@ resource "google_compute_subnetwork" "vpc_subnetwork_gke" {
       metadata             = var.log_config.metadata
     }
   }
-
-  enable_flow_logs = true
 }
 
 # external ip for NAT gateway
