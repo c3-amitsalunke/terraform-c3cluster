@@ -59,7 +59,7 @@ jobs:
               .filter(x => !x.startsWith('modules'))
               .filter(x => !x.startsWith('test'))
               .filter(x => x.includes('/'))
-              .map(x => x.split('/')[0])
+              .map(x => x.split('/')[1])
             ));
             if (directories.length < 1) return {};
             return {
