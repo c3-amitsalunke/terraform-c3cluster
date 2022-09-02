@@ -24,23 +24,18 @@ repos:
       - id: detect-private-key
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.58.0
+    rev: v1.68.0
     hooks:
-      - id: checkov
-        args: [
-          "-d", ".",
-          "--skip-check", "CKV2_GCP_3",
-          "--skip-check", "CKV_GCP_6",
-          "--skip-check", "CKV_GCP_12",
-          "--skip-check", "CKV_GCP_20",
-          "--skip-check", "CKV_GCP_21",
-          "--skip-check", "CKV_GCP_24",
-          "--skip-check", "CKV_GCP_62",
-          "--skip-check", "CKV_GCP_65",
-        ]
       - id: terraform_fmt
+#      - id: terraform_validate
       - id: terraform_docs
       - id: terraform_tflint
-#      - id: terraform_tfsec
-#      - id: terraform_validate
 #      - id: terrascan
+      - id: terraform_tfsec
+
+
+  - repo: https://github.com/terraform-docs/terraform-docs
+    rev: "v0.16.0"
+    hooks:
+      - id: terraform-docs-go
+        args: [ "markdown", "table", "--output-file", "README.md", "./gcp" ]
