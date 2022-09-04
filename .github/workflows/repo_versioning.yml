@@ -61,14 +61,9 @@ jobs:
               .filter(x => x.includes('/'))
               .map(x => x.split('/')[2])
             ));
+            if (directories.length < 1) return {};
             return {
-              include: [{
-                cloud : gcp
-                module: iam
-              },{
-                cloud: gcp
-                module: project
-              }],
+              include: directories.map(directory => ({ directory })),
             };
 
   plan:
@@ -76,16 +71,20 @@ jobs:
     if: ${{ needs.detect.outputs.directories != '{}' }}
     runs-on: ubuntu-latest
     strategy:
-      matrix: "${{ fromJson(needs.detect.outputs.directories) }}"
+      matrix:
+        include:
+          - cloud: "gcp"
+            module: "iam"
+          - cloud: "gcp"
+            module: "project"
       fail-fast: false
-    name: 'Module: ${{ matrix.directory }}'
+    name: 'Module: ${{ matrix.cloud }}-${{ matrix.module }}'
     steps:
-
       - name: Detect previous version number
         uses: actions/github-script@v4
         id: prev-version
         env:
-          PACKAGE_NAME: '${{ matrix.directory }}'
+          PACKAGE_NAME: '${{ matrix.cloud }}-${{ matrix.module }}'
         with:
           script: |
             const { owner, repo } = context.repo;
