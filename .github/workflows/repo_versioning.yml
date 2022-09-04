@@ -63,11 +63,11 @@ jobs:
             ));
             return {
               include: [{
-                "cloud": "gcp"
-                "module": "iam"
+                cloud : gcp
+                module: iam
               },{
-                "cloud": "project"
-                "module": "iam"
+                cloud: gcp
+                module: project
               }],
             };
 
