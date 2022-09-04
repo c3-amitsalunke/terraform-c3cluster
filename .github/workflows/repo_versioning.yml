@@ -175,78 +175,78 @@ jobs:
         working-directory: ${{ matrix.cloud }}/modules/${{ matrix.module }}
         run: zip -vr ../../../output/${{ matrix.cloud }}-${{ matrix.module }}.zip *
 
-#      - name: Upload result artifacts
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: '${{ matrix.directory }}'
-#          path: output
-#          retention-days: 5
+      - name: Upload result artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: '${{ matrix.cloud }}-${{ matrix.module }}'
+          path: output
+          retention-days: 1
 
 
-#  comment:
-#    needs: [detect, plan]
-#    if: needs.detect.outputs.is-merge-event == 'false'
-#    runs-on: ubuntu-latest
-#    name: 'Comment on PR'
-#    steps:
-#      - uses: actions/download-artifact@v2
-#        with:
-#          path: outputs
-#      - name: Display structure of downloaded files
-#        run: ls -R
-#        working-directory: outputs
-#
-#      - uses: actions/github-script@v2
-#        with:
-#          script: |
-#            const { owner, repo } = context.repo;
-#            const { number: issue_number } = context.issue;
-#            const { readdir, readFile } = require('fs').promises;
-#            const utf8 = { encoding: 'utf-8' };
-#
-#            const lines = [
-#              '# Release plan', '',
-#              '| Directory | Previous version | New version |',
-#              '|--|--|--|',
-#            ];
-#            const sections = [];
-#
-#            for (const folder of await readdir('outputs', { withFileTypes: true })) {
-#              if (!folder.isDirectory()) continue;
-#              const readText = (name) => readFile(name, utf8).then(x => x.trim());
-#
-#              lines.push('| '+[
-#                `\`${folder.name}\``,
-#                `${await readText(`outputs/${folder.name}/previous-version.txt`)}`,
-#                `**${await readText(`outputs/${folder.name}/new-version.txt`)}**`,
-#              ].join(' | ')+' |');
-#
-#              sections.push(`<details><summary>Changelog preview: ${folder.name}</summary>\n\n${await readText(`outputs/${folder.name}/changelog.md`)}\n</details>`);
-#            }
-#
-#            const finalBody = [lines.join('\n'), ...sections].join('\n\n');
-#
-#            const {data: allComments} = await github.issues.listComments({ issue_number, owner, repo });
-#            const ourComments = allComments
-#              .filter(comment => comment.user.login === 'github-actions[bot]')
-#              .filter(comment => comment.body.startsWith(lines[0]+'\n'));
-#
-#            const latestComment = ourComments.slice(-1)[0];
-#            if (latestComment && latestComment.body === finalBody) {
-#              console.log('Existing comment is already up to date.');
-#              return;
-#            }
-#
-#            const {data: newComment} = await github.issues.createComment({ issue_number, owner, repo, body: finalBody });
-#            console.log('Posted comment', newComment.id, '@', newComment.html_url);
-#            // Delete all our previous comments
-#            for (const comment of ourComments) {
-#              if (comment.id === newComment.id) continue;
-#              console.log('Deleting previous PR comment from', comment.created_at);
-#              await github.issues.deleteComment({ comment_id: comment.id, owner, repo });
-#            }
-#
-#
+  comment:
+    needs: [detect, plan]
+    if: needs.detect.outputs.is-merge-event == 'false'
+    runs-on: ubuntu-latest
+    name: 'Comment on PR'
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          path: outputs
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: outputs
+
+      - uses: actions/github-script@v2
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const { number: issue_number } = context.issue;
+            const { readdir, readFile } = require('fs').promises;
+            const utf8 = { encoding: 'utf-8' };
+
+            const lines = [
+              '# Release plan', '',
+              '| Directory | Previous version | New version |',
+              '|--|--|--|',
+            ];
+            const sections = [];
+
+            for (const folder of await readdir('outputs', { withFileTypes: true })) {
+              if (!folder.isDirectory()) continue;
+              const readText = (name) => readFile(name, utf8).then(x => x.trim());
+
+              lines.push('| '+[
+                `\`${folder.name}\``,
+                `${await readText(`outputs/${folder.name}/previous-version.txt`)}`,
+                `**${await readText(`outputs/${folder.name}/new-version.txt`)}**`,
+              ].join(' | ')+' |');
+
+              sections.push(`<details><summary>Changelog preview: ${folder.name}</summary>\n\n${await readText(`outputs/${folder.name}/changelog.md`)}\n</details>`);
+            }
+
+            const finalBody = [lines.join('\n'), ...sections].join('\n\n');
+
+            const {data: allComments} = await github.issues.listComments({ issue_number, owner, repo });
+            const ourComments = allComments
+              .filter(comment => comment.user.login === 'github-actions[bot]')
+              .filter(comment => comment.body.startsWith(lines[0]+'\n'));
+
+            const latestComment = ourComments.slice(-1)[0];
+            if (latestComment && latestComment.body === finalBody) {
+              console.log('Existing comment is already up to date.');
+              return;
+            }
+
+            const {data: newComment} = await github.issues.createComment({ issue_number, owner, repo, body: finalBody });
+            console.log('Posted comment', newComment.id, '@', newComment.html_url);
+            // Delete all our previous comments
+            for (const comment of ourComments) {
+              if (comment.id === newComment.id) continue;
+              console.log('Deleting previous PR comment from', comment.created_at);
+              await github.issues.deleteComment({ comment_id: comment.id, owner, repo });
+            }
+
+
 
 #  trigger-release:
 #    needs: [detect, plan]
