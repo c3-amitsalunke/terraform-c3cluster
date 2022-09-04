@@ -169,7 +169,7 @@ jobs:
 
       - name: Bundle up Terraform module
         working-directory: ${{ matrix.cloud }}/modules/${{ matrix.module }}
-        run: ls -atl ../
+        run: ls -atl .
 
       - name: Bundle up Terraform module
         working-directory: ${{ matrix.cloud }}/modules/${{ matrix.module }}
