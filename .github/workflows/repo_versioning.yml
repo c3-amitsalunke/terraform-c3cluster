@@ -61,10 +61,15 @@ jobs:
               .filter(x => x.includes('/'))
               .map(x => x.split('/')[2])
             ));
-            if (directories.length < 1) return {};
-            console.log(directory)
+            const hack = [{
+              "cloud": "gcp"
+              "module": "iam"
+            },{
+              "cloud": "project"
+              "module": "iam"
+            }]
             return {
-              include: directories.map(directory => ({ directory })),
+              include: hack,
             };
 
   plan:
