@@ -171,9 +171,9 @@ jobs:
         working-directory: ${{ matrix.cloud }}/modules/${{ matrix.module }}
         run: ls -atl .
 
-      - name: Bundle up Terraform module
-        working-directory: ${{ matrix.cloud }}/modules/${{ matrix.module }}
-        run: zip -vr ../output/${{ matrix.cloud }}-${{ matrix.module }}.zip *
+#      - name: Bundle up Terraform module
+#        working-directory: ${{ matrix.cloud }}/modules/${{ matrix.module }}
+#        run: zip -vr ../output/${{ matrix.cloud }}-${{ matrix.module }}.zip *
 
 #      - name: Upload result artifacts
 #        uses: actions/upload-artifact@v2
