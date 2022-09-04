@@ -61,15 +61,14 @@ jobs:
               .filter(x => x.includes('/'))
               .map(x => x.split('/')[2])
             ));
-            const hack = [{
-              "cloud": "gcp"
-              "module": "iam"
-            },{
-              "cloud": "project"
-              "module": "iam"
-            }]
             return {
-              include: hack,
+              include: [{
+                "cloud": "gcp"
+                "module": "iam"
+              },{
+                "cloud": "project"
+                "module": "iam"
+              }],
             };
 
   plan:
