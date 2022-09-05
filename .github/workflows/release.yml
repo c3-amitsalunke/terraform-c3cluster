@@ -38,6 +38,10 @@ jobs:
           path: outputs
       - name: 'Upload the files!'
         working-directory: outputs
+        env:
+          AWS_ACCESS_KEY_ID: ${{secrets.OPS_C3CI_AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.OPS_C3CI_AWS_SECRET_ACCESS_KEY}}
+          AWS_REGION: ${{secrets.OPS_C3CI_AWS_REGION}}
         run: |
           for module in *
           do
@@ -46,6 +50,6 @@ jobs:
             pushd  $module
             pwd
             ls -Rsh .
-            echo aws s3 cp terraform-module.zip  s3://my-s3-repo/$module-$(cat new-version.txt).zip
+            aws s3 cp $module.zip  s3://${{secrets.OPS_C3CI_TF_REGISTRY}}/$module-$(cat new-version.txt).zip
             popd
           done
