@@ -53,6 +53,13 @@ jobs:
           RAW_FILES: '${{ steps.raw-files.outputs.all }}'
         with:
           script: |
+            function uniqBy(a, key) {
+              var seen = {};
+              return a.filter(function(item) {
+                var k = key(item);
+                return seen.hasOwnProperty(k) ? false : (seen[k] = true);
+              })
+            }
             const raw = JSON.parse(process.env.RAW_FILES);
             const directories = Array.from(new Set(raw
               .filter(x => !x.startsWith('.'))
@@ -63,7 +70,7 @@ jobs:
             ));
             if (directories.length < 1) return {};
             return {
-              include: directories.map(directory => ({ directory })),
+              include: uniqBy(directories, it => it.id),
             };
 
   plan:
@@ -71,12 +78,7 @@ jobs:
     if: ${{ needs.detect.outputs.directories != '{}' }}
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        include:
-          - cloud: "gcp"
-            module: "iam"
-          - cloud: "gcp"
-            module: "project"
+      matrix: "${{ fromJson(needs.detect.outputs.directories) }}"
       fail-fast: false
     name: 'Module: ${{ matrix.cloud }}-${{ matrix.module }}'
     steps:

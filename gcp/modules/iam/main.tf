@@ -2,6 +2,11 @@ data "google_compute_default_service_account" "default_service_account" {
   project = var.project_id
 }
 
+data "google_compute_default_service_account" "default_service_account_2" {
+  project = var.project_id
+}
+
+
 # This provisions google_storage_project_service_account
 data "google_storage_project_service_account" "gcs_account" {
   project = var.project_id
