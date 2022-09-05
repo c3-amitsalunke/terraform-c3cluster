@@ -1,4 +1,4 @@
-name: Repo Versioning
+name: TF Module Versioning
 concurrency:  #avoid concurrent runs on label events, might cause issues on super fast commits  ¯\_(ツ)_/¯
   group: ${{ github.head_ref }}
   cancel-in-progress: true
@@ -10,6 +10,13 @@ on:
     types: [closed]
 
 jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+      - uses: pre-commit/action@v3.0.0
+
   detect:
     runs-on: ubuntu-latest
     name: 'Detect pull request context'
@@ -249,7 +256,7 @@ jobs:
 
   trigger-release:
     needs: [detect, plan]
-#    if: needs.detect.outputs.is-merge-event == 'true'
+    if: needs.detect.outputs.is-merge-event == 'true'
     runs-on: ubuntu-latest
     name: 'Dispatch release event'
     steps:

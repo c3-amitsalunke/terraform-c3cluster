@@ -1,4 +1,4 @@
-name: 'Repo Release'
+name: TF Module Release
 on:
   repository_dispatch:
     types: [tf_module_release]
