@@ -10,13 +10,6 @@ on:
     types: [closed]
 
 jobs:
-  pre-commit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
-      - uses: pre-commit/action@v3.0.0
-
   detect:
     runs-on: ubuntu-latest
     name: 'Detect pull request context'
@@ -188,7 +181,6 @@ jobs:
           name: '${{ matrix.cloud }}-${{ matrix.module }}'
           path: output
           retention-days: 1
-
 
   comment:
     needs: [detect, plan]
