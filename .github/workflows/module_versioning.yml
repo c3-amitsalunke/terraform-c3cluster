@@ -42,7 +42,7 @@ jobs:
             exit 2
           fi
       - name: Get changed files
-        uses: Ana06/get-changed-files@v1.2
+        uses: Ana06/get-changed-files@v2.1.0
         id: raw-files
         with:
           format: 'json'
@@ -50,20 +50,29 @@ jobs:
         uses: actions/github-script@v4
         id: condense
         env:
-          RAW_FILES: '${{ steps.raw-files.outputs.all }}'
+          RAW_FILES: '${{ steps.raw-files.outputs.added_modified }}'
         with:
           script: |
+            uniqBy = function(a, key) {
+              var seen = {};
+              return a.filter(function(item) {
+                var k = key(item);
+                return seen.hasOwnProperty(k) ? false : (seen[k] = true);
+              })
+            }
             const raw = JSON.parse(process.env.RAW_FILES);
-            const directories = Array.from(new Set(raw
+            const directories = Array.from(raw
               .filter(x => !x.startsWith('.'))
               .filter(x => !x.startsWith('modules'))
               .filter(x => !x.startsWith('test'))
               .filter(x => x.includes('/'))
-              .map(x => x.split('/')[2])
-            ));
+              .map(function(x){
+                return { "id": x.split('/')[0] + "-" + x.split('/')[2], "cloud" : x.split('/')[0], "module": x.split('/')[2] };
+              })
+            );
             if (directories.length < 1) return {};
             return {
-              include: directories.map(directory => ({ directory })),
+              include: uniqBy(directories, it => it.id),
             };
 
   plan:
@@ -71,12 +80,7 @@ jobs:
     if: ${{ needs.detect.outputs.directories != '{}' }}
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        include:
-          - cloud: "gcp"
-            module: "iam"
-          - cloud: "gcp"
-            module: "project"
+      matrix: "${{ fromJson(needs.detect.outputs.directories) }}"
       fail-fast: false
     name: 'Module: ${{ matrix.cloud }}-${{ matrix.module }}'
     steps:
